@@ -1,0 +1,17 @@
+15 devices found
+ mac: None ip:192.168.0.52 ports:[22, 44, 80, 139, 445].
+ mac: None ip:192.168.0.100 ports:[139, 135, 445, 475].
+ mac: None ip:192.168.0.50 ports:[22, 111].
+ mac: None ip:192.168.0.182 ports:[135, 139, 445, 756].
+ mac: None ip:192.168.0.53 ports:[22].
+ mac: None ip:192.168.0.195 ports:[22].
+ mac: None ip:192.168.0.56 ports:[22].
+ mac: None ip:192.168.0.60 ports:[22].
+ mac: None ip:192.168.0.201 ports:[80, 443, 427, 515, 631].
+ mac: None ip:192.168.0.206 ports:[135, 139, 445].
+ mac: None ip:192.168.0.205 ports:[22, 80].
+ mac: None ip:192.168.0.208 ports:[139, 135].
+ mac: None ip:192.168.0.180 ports:[22, 23, 443].
+ mac: None ip:192.168.0.187 ports:[631].
+ mac: None ip:192.168.0.254 ports:[22, 53].
+
