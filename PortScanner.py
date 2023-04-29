@@ -1,11 +1,11 @@
 import socket
-import time
 import threading
 from queue import Queue
 
-from Consts import SOCKET_DEFAULT_TIMEOUT, MAX_THREADS
+from Consts import SOCKET_DEFAULT_TIMEOUT, MAX_THREADS_PORT_SCAN_THREADS
 
 socket.setdefaulttimeout(SOCKET_DEFAULT_TIMEOUT)
+
 
 # Класс который реализует сканер портов для заданного IP-адреса.
 # Он использует модуль socket для создания сокетов и установки соединений с портами.
@@ -32,10 +32,16 @@ socket.setdefaulttimeout(SOCKET_DEFAULT_TIMEOUT)
 # В блоке if name == 'main': создается объект PortScanner с запрашиваемым пользователем
 # IP-адресом, запускается сканирование портов и выводится список открытых портов.
 
+
 class PortScanner:
+
+
     # передаем ip address
     def __init__(self, target):
-        print(target)
+
+        self.open_ports = None
+        self.q_ports = None
+        self.thread_flag = False
         self.target = target
         self.t_IP = socket.gethostbyname(target)
         self.print_lock = threading.Lock()
@@ -44,36 +50,32 @@ class PortScanner:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             con = s.connect((self.t_IP, port))
-            with self.print_lock:
-                self.open_ports.append(port)
+            self.open_ports.append(port)
             con.close()
         except:
             pass
 
     def threader(self):
         while True:
-            worker = self.q.get()
+            worker = self.q_ports.get()
             self.portscan(worker)
-            self.q.task_done()
+            self.q_ports.task_done()
 
-    def scan_ports(self, start_port=1, end_port=500):
+    def scan_ports_treads(self, start_port=1, end_port=500):
         self.open_ports = []
-        self.q = Queue()
-        startTime = time.time()
-
-        for x in range(MAX_THREADS):
+        self.q_ports = Queue()
+        for x in range(MAX_THREADS_PORT_SCAN_THREADS):
             t = threading.Thread(target=self.threader)
             t.daemon = True
             t.start()
 
         for worker in range(start_port, end_port + 1):
-            self.q.put(worker)
+            self.q_ports.put(worker)
 
-        self.q.join()
-        # print('Time taken:', time.time() - startTime)
+        self.q_ports.join()
         return self.open_ports
 
 if __name__ == '__main__':
     scanner = PortScanner(input('Enter the host to be scanned: '))
-    open_ports = scanner.scan_ports()
+    open_ports = scanner.scan_ports_treads()
     print('Open ports:', open_ports)

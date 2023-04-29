@@ -35,14 +35,14 @@ class ScannerGui:
         self.ip_label = tk.Label(master, text="IP range:")
         self.ip_label.grid(row=0, column=0)
         self.ip_entry = tk.Entry(master)
-        self.ip_entry.insert(0, "192.168.1.0/24")
+        self.ip_entry.insert(0, "192.168.110.0/24")
         self.ip_entry.grid(row=0, column=1)
 
         # Port range input
         self.port_label = tk.Label(master, text="Port range:")
         self.port_label.grid(row=1, column=0)
         self.port_entry = tk.Entry(master)
-        self.port_entry.insert(0, "1-1000")
+        self.port_entry.insert(0, "20-60")
         self.port_entry.grid(row=1, column=1)
 
         # Timeout input
@@ -73,6 +73,7 @@ class ScannerGui:
         self.save_button.grid(row=6, column=0)
 
     def start_scan(self):
+        self.result_text.option_clear()
         target = self.ip_entry.get()
         ports = self.port_entry.get()
         mac_need = self.mac_need_enabled.get()
