@@ -1,4 +1,6 @@
+import os
 import tkinter as tk
+import csv
 from tkinter import filedialog
 
 from NetworkScanner import NetworkScanner
@@ -22,12 +24,28 @@ from NetworkScanner import NetworkScanner
 
 class ScannerGui:
     def save_results(self):
-        filename = filedialog.asksaveasfilename(defaultextension=".txt")
+        filename = filedialog.asksaveasfilename(filetypes=[("TXT", ".txt"), ("CSV", ".csv")])
         if filename:
-            with open(filename, "w") as f:
-                f.write(self.result_text.get(1.0, tk.END))
+            ext = os.path.splitext(filename)[1]
+            if ext == '.csv':
+                with open(filename, "w", newline="") as file:
+                    columns = ["IP", "mac", "ports"]
+                    writer = csv.DictWriter(file, fieldnames=columns, delimiter=';')
+                    writer.writeheader()
+
+                    for node in self.resp:
+                        record = {
+                            "IP": self.resp[node].ip,
+                            "mac": self.resp[node].mac,
+                            "ports": self.resp[node].ports
+                        }
+                        writer.writerow(record)
+            elif ext == '.txt':
+                with open(filename, "w") as f:
+                    f.write(self.result_text.get(1.0, tk.END))
 
     def __init__(self, master):
+        self.resp = None
         self.master = master
         master.title("Network Scanner")
 
@@ -79,10 +97,11 @@ class ScannerGui:
         mac_need = self.mac_need_enabled.get()
         timeout = self.timeout_entry.get()
         net_scanner = NetworkScanner()
-        resp = net_scanner.scan_network(target, ports, mac_need, timeout)
-        self.result_text.insert(tk.END, f"{len(resp)} devices found\n")
-        for i in resp:
-            self.result_text.insert(tk.END, f" mac: {i.mac} ip:{i.ip} ports:{i.ports}.\n")
+        self.resp = net_scanner.scan_network(target, ports, mac_need, timeout)
+        self.result_text.insert(tk.END, f"{len(self.resp)} devices found\n")
+        for i in self.resp:
+            self.result_text.insert(tk.END,
+                                    f" mac: {self.resp[i].mac} ip:{self.resp[i].ip} ports:{self.resp[i].ports}.\n")
 
 
 if __name__ == "__main__":

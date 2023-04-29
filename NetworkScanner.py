@@ -1,8 +1,8 @@
 import ipaddress
 import subprocess
 import threading
-from multiprocessing.pool import ThreadPool
 from queue import Queue
+import re
 
 from Consts import MAX_THREADS_IP_SCAN_THREADS
 from PortScanner import PortScanner
@@ -34,8 +34,7 @@ class NetworkScanner:
         self.mac_need = False
 
     def scan_network(self, target, ports="1-500", mac_need=False, timeout=1, to_ports_scan=True):
-        global stop_thread
-        self.net_nodes = []
+        self.net_nodes = {}
         self.ip_list = [str(ip) for ip in ipaddress.IPv4Network(target)]
         self.port_range = [int(x) for x in ports.split("-")]
         self.mac_need = mac_need
@@ -45,31 +44,43 @@ class NetworkScanner:
         if mac_need:
             for ip in self.ip_list:
                 mac = get_mac(ip)
-                if mac is None:
+                match = re.match(r'([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}',mac)
+                # print(f"match {match} ", type(match))
+                if match is None:
+                    print("removed")
                     self.ip_list.remove(ip)
+                else:
+                    print("added")
+                    self.net_nodes[ip] = NetNode(ip, mac)
 
-        stop_thread = False
         for x in range(MAX_THREADS_IP_SCAN_THREADS):
             t = threading.Thread(target=self.threader)
             t.daemon = True
             t.start()
 
-        for worker in self.ip_list:
-            self.q.put(worker)
+        if mac_need:
+            for worker in self.net_nodes:
+                self.q.put(worker)
+        else:
+            for worker in self.ip_list:
+                self.q.put(worker)
         self.q.join()
-        stop_thread = True
         return self.net_nodes
 
     def threader(self):
+        print(f"{threading.current_thread().getName()} start")
         while True:
             worker = self.q.get()
             scanner = PortScanner(worker)
             open_ports = scanner.scan_ports_treads(self.port_range[0], self.port_range[1])
-
+            print(f"scan {worker} ports {open_ports}")
             if len(open_ports) > 0:
-                a = NetNode(worker)
+                if self.mac_need:
+                    a = self.net_nodes[worker]
+                else:
+                    a = NetNode(worker)
                 a.set_ports(open_ports)
-                self.net_nodes.append(a)
+                self.net_nodes[worker] = a
             self.q.task_done()
 
 
@@ -90,4 +101,4 @@ if __name__ == '__main__':
     net_scanner = NetworkScanner()
     allIP = net_scanner.scan_network("192.168.110.0/24", "10-100", mac_need=False)
     for i in allIP:
-        i.print()
+        allIP[i].print()
