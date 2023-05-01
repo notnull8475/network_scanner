@@ -36,7 +36,7 @@ class ScannerGui:
             # весь ответ полученный при сканировании
             if ext == '.csv':
                 with open(filename, "w", newline="") as file:
-                    columns = ["IP", "mac", "ports"]
+                    columns = ["IP", "hostname", "mac", "ports"]
                     # указываем файл и меняем стандартный разделитель
                     writer = csv.DictWriter(file, fieldnames=columns, delimiter=';')
                     writer.writeheader()
@@ -45,6 +45,7 @@ class ScannerGui:
                         # запись - куда помещаем данные об найденных узлах для корректного сохранения
                         record = {
                             "IP": self.resp[node].ip,
+                            "Hostname:": self.resp[node].hostname,
                             "mac": self.resp[node].mac,
                             "ports": self.resp[node].ports
                         }
@@ -97,7 +98,7 @@ class ScannerGui:
         # Result output
         self.result_label = tk.Label(master, text="Results:")
         self.result_label.grid(row=5, column=0)
-        self.result_text = tk.Text(master, height=10, width=50)
+        self.result_text = tk.Text(master, height=10, width=80)
         self.result_text.grid(row=5, column=1)
 
         # Save button
@@ -116,7 +117,7 @@ class ScannerGui:
         self.result_text.insert(tk.END, f"{len(self.resp)} devices found\n")
         for i in self.resp:
             self.result_text.insert(tk.END,
-                                    f" mac: {self.resp[i].mac} ip:{self.resp[i].ip} ports:{self.resp[i].ports}.\n")
+                                    f" mac: {self.resp[i].mac} ip:{self.resp[i].ip} hostname: {self.resp[i].hostname} ports:{self.resp[i].ports}.\n")
 
 
 if __name__ == "__main__":

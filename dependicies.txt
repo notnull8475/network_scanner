@@ -1,0 +1,7 @@
+netifaces
+scanner
+setuptools
+startrek
+tcp
+udp
+wheel

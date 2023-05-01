@@ -1,4 +1,5 @@
 import ipaddress
+import socket
 import subprocess
 import threading
 from queue import Queue
@@ -37,6 +38,14 @@ def get_mac(ip_address):
             if len(parts) >= 3:
                 return parts[2]
     return None
+
+
+def get_remote_computer_name(ip_address):
+    try:
+        name = socket.gethostbyaddr(ip_address)[0]
+    except socket.herror:
+        name = None
+    return name
 
 
 class NetworkScanner:
@@ -97,14 +106,16 @@ class NetworkScanner:
                     a = self.net_nodes[worker]
                 else:
                     a = NetNode(worker)
+                a.hostname = get_remote_computer_name(worker)
                 a.set_ports(open_ports)
                 self.net_nodes[worker] = a
             self.q.task_done()
 
 
 class NetNode:
-    def __init__(self, ip, mac=None):
+    def __init__(self, ip, hostname=None, mac=None):
         self.ip = ip
+        self.hostname = hostname
         self.mac = mac
         self.ports = None
 
@@ -112,7 +123,7 @@ class NetNode:
         self.ports = ports
 
     def print(self):
-        print("ip:" + str(self.ip) + " mac: " + str(self.mac) + " " + str(self.ports))
+        print("ip:" + str(self.ip) + " hostname: " + self.hostname + " mac: " + str(self.mac) + " " + str(self.ports))
 
 
 if __name__ == '__main__':
