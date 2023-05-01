@@ -23,27 +23,41 @@ from NetworkScanner import NetworkScanner
 # Результаты сканирования сохраняются в выбранный файл в формате текста.
 
 class ScannerGui:
+
+    # функция сохранеия результатов в файл
     def save_results(self):
+        # добавле выбор между txt и csv форматом
         filename = filedialog.asksaveasfilename(filetypes=[("TXT", ".txt"), ("CSV", ".csv")])
+        # если имя выбрано то
         if filename:
+            # определяется выбранное расширение
             ext = os.path.splitext(filename)[1]
+            # если это csv то мы создаем файл, добавляем в него заголовок и в цикле добавляем последовательно
+            # весь ответ полученный при сканировании
             if ext == '.csv':
                 with open(filename, "w", newline="") as file:
                     columns = ["IP", "mac", "ports"]
+                    # указываем файл и меняем стандартный разделитель
                     writer = csv.DictWriter(file, fieldnames=columns, delimiter=';')
                     writer.writeheader()
 
                     for node in self.resp:
+                        # запись - куда помещаем данные об найденных узлах для корректного сохранения
                         record = {
                             "IP": self.resp[node].ip,
                             "mac": self.resp[node].mac,
                             "ports": self.resp[node].ports
                         }
+
+                        # добавляем в файл
                         writer.writerow(record)
+
+            #  при сохранении  в txt просто записываем содержимое окна результатов
             elif ext == '.txt':
                 with open(filename, "w") as f:
                     f.write(self.result_text.get(1.0, tk.END))
 
+    # конструктов
     def __init__(self, master):
         self.resp = None
         self.master = master
@@ -90,6 +104,7 @@ class ScannerGui:
         self.save_button = tk.Button(master, text="Save", command=self.save_results)
         self.save_button.grid(row=6, column=0)
 
+    # функция запуска сканирования
     def start_scan(self):
         self.result_text.option_clear()
         target = self.ip_entry.get()
