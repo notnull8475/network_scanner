@@ -1,2 +1,6 @@
-prettytable
+socket
+subprocess
+tkinter
 scapy
+prettytable
+csv

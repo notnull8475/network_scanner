@@ -23,9 +23,11 @@
 
 #### Используемые библиотеки:
 - socket
+- subprocess
 - tkinter
 - scapy
 - prettytable
+- csv
 
 ### Описание классов:
 
